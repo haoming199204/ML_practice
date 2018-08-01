@@ -6,9 +6,7 @@ from sklearn.metrics import mean_squared_error as mse
 
 
 class Data(object):
-    def __init__(self):
-        train_data_url = "data/housing_train.txt"
-        test_data_url = "data/housing_test.txt"
+    def __init__(self, train_data_url, test_data_url):
         names = ['CRIM', 'ZN', 'INDUS', 'CHAS', 'NOX', 'RM', 'AGE', 'DIS', 'RAD', 'TAX', 'PTRATIO', 'B', 'LSTAT',
                  'MEDV']
         train_dataset = pandas.read_csv(train_data_url, names=names, sep='\s+')
@@ -28,20 +26,28 @@ def sklearn_lr(x, y, xv, yv):
 
 def BGD(X, y, Xv, yv):
     m, n = X.shape
-    x0 = ones([m, 1])
-    X = hstack((x0, X))
+    '''训练集初始化θ0'''
+    X0 = ones([m, 1])
+    X = hstack((X0, X))
     m, n = X.shape
+    '''初始化参数'''
     theta_array = random.rand(14)
     alpha = 1e-4
     error = 1
+    '''loop，误差小于阈值时停止'''
     while error > 1e-12:
+        '''求每个样本的预测值h'''
         h = dot(X, theta_array.reshape((n, 1)))
+        '''∑(y-h)*xj'''
         sum_delta = dot(y - h.reshape((1, m)), X)
+        '''更新每个特征θj := θj + α∑(y-h)*xj'''
         theta_array = theta_array + alpha * sum_delta.flatten()
+        '''误差范数'''
         error = norm(alpha * sum_delta.flatten())
         print(error)
     print(theta_array)
 
+    '''计算MSE'''
     m, n = Xv.shape
     Xv0 = ones([m, 1])
     Xv = hstack((Xv0, Xv))
@@ -81,6 +87,7 @@ def SGD(X, y, Xv, yv):
 
 
 def NE(x, y, xv, yv):
+    '''θ=(XTX)^-1 * XTy'''
     theta_array = dot(inv(dot(x.T, x)), dot(x.T, y))
     print(theta_array)
     error = 0.0
@@ -114,7 +121,9 @@ def standardize(X):
 
 
 def main():
-    data = Data()
+    train_data_url = "data/housing_train.txt"
+    test_data_url = "data/housing_test.txt"
+    data = Data(train_data_url, test_data_url)
     '''调用sklearn进行线性回归'''
     # 22.638256296587667
     sklearn_lr(data.X_train, data.y_train, data.X_validation, data.y_validation)
